@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogTrigger,
@@ -22,6 +22,27 @@ export default function Home() {
 	const [items, setItems] = useState<Item[]>([]);
 	const [newItemName, setNewItemName] = useState("");
 	const [newItemValue, setNewItemValue] = useState<number | "">("");
+
+	// Load items from localStorage on mount
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const storedItems = localStorage.getItem("tally-items");
+			if (storedItems) {
+				try {
+					setItems(JSON.parse(storedItems));
+				} catch (error) {
+					console.error("Error parsing localStorage data:", error);
+				}
+			}
+		}
+	}, []);
+
+	// Save items to localStorage whenever they update
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			localStorage.setItem("tally-items", JSON.stringify(items));
+		}
+	}, [items]);
 
 	const handleAddItem = () => {
 		if (newItemName.trim() !== "") {
@@ -101,35 +122,45 @@ export default function Home() {
 					</DialogContent>
 				</Dialog>
 			</section>
-			<ul className="mt-6 w-full space-y-4 max-w-5xl flex justify-center flex-col mx-auto">
-				{items.map((item, index) => (
-					<li
-						key={index}
-						className="flex items-center justify-between border-2 rounded-full py-2 px-6 w-full"
-					>
-						<Button
-							variant="outline"
-							className="rounded-full"
-							size="icon"
-							onClick={() => decrementCount(index)}
-						>
-							-
-						</Button>
-						<div className="flex flex-col gap-2 items-center justify-center">
-							<span className="text-xl font-semibold">{item.name}</span>
-							<span className="text-lg mt-2">{item.count}</span>
-						</div>
-						<Button
-							variant="outline"
-							className="rounded-full"
-							size="icon"
-							onClick={() => incrementCount(index)}
-						>
-							+
-						</Button>
-					</li>
-				))}
-			</ul>
+			<section className="mt-6 w-full space-y-4 max-w-5xl flex justify-center flex-col mx-auto">
+				{items.length === 0 ? (
+					<div className="text-center mt-6">
+						<p className="text-lg font-medium">
+							No items yet. Add one to get started!
+						</p>
+					</div>
+				) : (
+					<ul className="mt-6 w-full space-y-4 max-w-5xl flex justify-center flex-col mx-auto">
+						{items.map((item, index) => (
+							<li
+								key={index}
+								className="flex items-center justify-between border-2 rounded-full py-2 px-6 w-full hover:scale-105 hover:border-foreground transition-transform duration-300"
+							>
+								<Button
+									variant="outline"
+									className="rounded-full"
+									size="icon"
+									onClick={() => decrementCount(index)}
+								>
+									-
+								</Button>
+								<div className="flex flex-col gap-2 items-center justify-center">
+									<span className="text-xl font-semibold">{item.name}</span>
+									<span className="text-lg mt-2">{item.count}</span>
+								</div>
+								<Button
+									variant="outline"
+									className="rounded-full"
+									size="icon"
+									onClick={() => incrementCount(index)}
+								>
+									+
+								</Button>
+							</li>
+						))}
+					</ul>
+				)}
+			</section>
 		</main>
 	);
 }
