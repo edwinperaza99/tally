@@ -1,5 +1,17 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { ThemePicker } from "./theme-picker";
+import { signIn, signOut, useSession } from "next-auth/react";
+
+function AuthButton() {
+	const { data: session } = useSession();
+
+	if (session) {
+		return <Button onClick={() => signOut()}>Sign out</Button>;
+	}
+
+	return <Button onClick={() => signIn()}>Sign in</Button>;
+}
 
 export default function Navbar() {
 	return (
@@ -10,8 +22,7 @@ export default function Navbar() {
 						<ThemePicker />
 					</div>
 					<div className="flex gap-2">
-						<Button variant="outline">Log In</Button>
-						<Button>Sign Up</Button>
+						<AuthButton />
 					</div>
 				</div>
 			</div>
